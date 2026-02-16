@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Năm Mới Của Hai Đứa Mình ❤️ Bản Hoàn Hảo</title>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Quicksand:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body, html {
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            background-color: #050210; overflow: hidden;
+            font-family: 'Quicksand', sans-serif;
+        }
+
+        /* Nền đỏ ngày Tết - Nằm tách biệt ở dưới cùng */
+        #bg-red {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 5;
+            background: radial-gradient(circle at bottom center, #cc0000 0%, #660000 80%, #330000 100%);
+            opacity: 0; transition: opacity 1.5s ease-in-out; pointer-events: none;
+        }
+
+        /* Canvas tĩnh: Vẽ cây mai (Nằm trên nền đỏ) */
+        #tree-canvas {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10;
+            display: none; pointer-events: none;
+        }
+
+        /* Canvas động: Vẽ sao, pháo hoa, hoa rơi (Nằm trên cây mai) */
+        #anim-canvas {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 20; 
+        }
+
+        /* --- CẢNH 1: GIAO DIỆN LỜI CHÚC --- */
+        #scene1 {
+            position: absolute; width: 100%; height: 100%; z-index: 30;
+            transition: opacity 1s ease-in-out;
+            pointer-events: none;
+        }
+
+        .glass-panel {
+            position: absolute; top: 45%; left: 50%; transform: translate(-50%, -50%);
+            background: rgba(40, 40, 60, 0.2); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 25px;
+            padding: 45px; text-align: center; box-shadow: 0 10px 40px rgba(255, 20, 147, 0.4);
+            min-width: 320px; max-width: 90%; pointer-events: auto; 
+        }
+
+        h1 {
+            font-family: 'Dancing Script', cursive; font-size: 3.8rem; /* Đã chỉnh nhỏ hơn (cũ: 5rem) */ margin: 0 0 20px 0;
+            background: linear-gradient(to right, #ff66b3, #ff1a75, #ff9933);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 15px rgba(255, 26, 117, 0.8));
+            animation: floatText 3s ease-in-out infinite;
+        }
+
+        #typewriter-text { color: #ffffff; font-size: 1.2rem; /* Đã chỉnh nhỏ hơn (cũ: 1.5rem) */ font-weight: 600; line-height: 1.7; min-height: 70px; }
+        .cursor { display: inline-block; width: 3px; height: 1.4em; background-color: #ff1a75; vertical-align: middle; animation: blink 0.8s infinite; margin-left: 5px; }
+
+        .btn-next {
+            position: absolute; bottom: 15%; left: 50%; transform: translateX(-50%);
+            padding: 15px 40px; font-size: 1.2rem; font-family: 'Quicksand', sans-serif; font-weight: bold;
+            color: #fff; background: linear-gradient(45deg, #ff1a75, #ff66b3);
+            border: none; border-radius: 30px; cursor: pointer;
+            box-shadow: 0 5px 20px rgba(255, 26, 117, 0.6); transition: all 0.3s;
+            pointer-events: auto; z-index: 31;
+        }
+        .btn-next:hover { transform: translate(-50%, -5px) scale(1.05); box-shadow: 0 10px 30px rgba(255, 26, 117, 0.9); }
+
+        /* --- CẢNH 2: LÌ XÌ & LỜI CHÚC (Không có màu nền để tránh che cây) --- */
+        #scene2 {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 40;
+            display: none; opacity: 0; transition: opacity 1.5s ease-in-out;
+            pointer-events: none;
+        }
+
+        .lixi {
+            position: absolute; width: 35px; height: 55px;
+            background: linear-gradient(135deg, #e60000, #c70000); 
+            border: 2px solid #ffd700; border-radius: 4px;
+            display: flex; align-items: center; justify-content: center; font-size: 1.5rem;
+            cursor: pointer; pointer-events: auto;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            transform-origin: top center;
+            animation: swingLixi 3s ease-in-out infinite alternate;
+            transition: transform 0.2s, filter 0.2s;
+        }
+        .lixi::before {
+            content: ''; position: absolute; top: -15px; left: 50%; transform: translateX(-50%);
+            width: 2px; height: 15px; background-color: #ffd700;
+        }
+        .lixi:hover { filter: brightness(1.2); transform: scale(1.1); animation-play-state: paused; }
+        .lixi::after { content: '🧧'; }
+
+        /* Bảng Modal Lời Chúc */
+        .wish-modal {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.8);
+            background: rgba(139, 0, 0, 0.95); backdrop-filter: blur(10px);
+            border: 3px solid #ffd700; border-radius: 20px; padding: 40px; text-align: center;
+            box-shadow: 0 0 50px rgba(255, 215, 0, 0.5);
+            min-width: 320px; max-width: 85%; pointer-events: auto;
+            opacity: 0; visibility: hidden; transition: all 0.4s;
+            z-index: 50;
+        }
+        .wish-modal.active { opacity: 1; visibility: visible; transform: translate(-50%, -50%) scale(1); }
+        
+        .wish-text { color: #ffd700; font-size: 1.8rem; font-family: 'Dancing Script', cursive; margin-bottom: 25px; line-height: 1.5; }
+        .btn-close {
+            background: linear-gradient(45deg, #ffd700, #ffaa00); color: #8b0000; border: none; padding: 12px 30px;
+            border-radius: 20px; font-weight: bold; cursor: pointer; font-family: 'Quicksand'; font-size: 1.1rem;
+        }
+
+        @keyframes floatText { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
+        @keyframes blink { 0%, 50% { opacity: 1; } 51%, 100% { opacity: 0; } }
+        @keyframes swingLixi { 0% { transform: rotate(-8deg); } 100% { transform: rotate(8deg); } }
+
+        @media (max-width: 600px) {
+            h1 { font-size: 2.8rem; } /* Đã chỉnh nhỏ hơn cho mobile (cũ: 3.5rem) */ 
+            #typewriter-text { font-size: 1rem; } /* Đã chỉnh nhỏ hơn cho mobile (cũ: 1.2rem) */ 
+            .glass-panel { padding: 25px; }
+            .lixi { width: 25px; height: 40px; font-size: 1rem; } .lixi::before { top: -10px; height: 10px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="bg-red"></div>
+
+    <canvas id="tree-canvas"></canvas>
+    
+    <canvas id="anim-canvas"></canvas>
+
+    <div id="scene1">
+        <div class="glass-panel">
+            <h1>New Year, Near You</h1>
+            <div style="display: inline-block;"><span id="typewriter-text"></span><span class="cursor"></span></div>
+        </div>
+        <button class="btn-next" id="btn-next">Mở Cửa Mùa Xuân 🌸</button>
+    </div>
+
+    <div id="scene2">
+        <div id="lixi-container"></div>
+        <div class="wish-modal" id="wish-modal">
+            <div class="wish-text" id="wish-text"></div>
+            <button class="btn-close" id="btn-close">Cất Lì Xì Đi ❤️</button>
+        </div>
+    </div>
+
+    <script>
+        const animCanvas = document.getElementById('anim-canvas');
+        const animCtx = animCanvas.getContext('2d');
+        const treeCanvas = document.getElementById('tree-canvas');
+        const treeCtx = treeCanvas.getContext('2d');
+        
+        let width, height;
+        let currentScene = 1;
+
+        function resize() {
+            width = window.innerWidth;
+            height = window.innerHeight;
+            animCanvas.width = treeCanvas.width = width;
+            animCanvas.height = treeCanvas.height = height;
+            
+            // Xóa rác canvas cũ nếu có resize màn hình
+            if (currentScene === 2) {
+                drawTreeOnly();
+            }
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        // --- CẤU HÌNH DATA ---
+        const sweetWords = ["❤️ Yêu Em ❤️", "Năm Mới Vui Vẻ", "Vạn Sự Như Ý", "Năm mới hạnh phúc"];
+        const romanticColors = ['#ff0055', '#ff3385', '#ff66b3', '#ff99cc', '#ffffff', '#ffd700'];
+        const wishes = [
+            "Chúc dợ iu năm mới rạng rỡ và xinh đẹp như đóa mai vàng này! 🌼",
+            "Chúc em một năm mới vạn sự như ý, tỉ sự như mơ. 😘",
+            "Lại thêm 1 năm mới đến rồi, mình cứ thế nắm tay nhau đi hết thanh xuân em nhé. ❤️",
+            "Chúc cô gái của anh năm mới: Ăn nhiều không béo, tiền nhiều không lo, và đặc biệt là... yêu anh nhiều hơn năm cũ nhé! Năm mới bớt dỗi, thêm vui nhé. 🥰",
+            "Chúc người yêu của anh luôn xinh đẹp, khỏe mạnh và lại thêm 1 năm hạnh phúc bên nhau. 👩‍❤️‍👨",
+            "Cảm ơn em đã là mùa xuân của anh, chúc em một năm mới rực rỡ nhất. 💋"
+        ];
+
+        // --- CÁC CLASS HIỆU ỨNG (Chạy trên animCanvas) ---
+        class AuraRing {
+            constructor(x, y) { this.x=x; this.y=y; this.r1=5; this.r2=5; this.a=1; this.speed=12; }
+            update() { this.r1+=this.speed; this.r2+=this.speed*1.5; this.a-=0.03; }
+            draw() { animCtx.save(); animCtx.globalAlpha=this.a; animCtx.shadowBlur=20; animCtx.shadowColor='#ff1a75';
+                animCtx.beginPath(); animCtx.arc(this.x,this.y,this.r1,0,Math.PI*2); animCtx.strokeStyle='#fff'; animCtx.lineWidth=4; animCtx.stroke();
+                animCtx.beginPath(); animCtx.arc(this.x,this.y,this.r2,0,Math.PI*2); animCtx.strokeStyle='#ff66b3'; animCtx.lineWidth=2; animCtx.stroke(); animCtx.restore(); }
+        }
+        class FloatingWord {
+            constructor(x, y) { this.x=x; this.y=y; this.text=sweetWords[Math.floor(Math.random()*sweetWords.length)]; this.vx=(Math.random()-0.5)*8; this.vy=-Math.random()*6-4; this.a=1.2; this.fs=Math.random()*12+20; this.c=romanticColors[Math.floor(Math.random()*romanticColors.length)]; }
+            update() { this.x+=this.vx; this.y+=this.vy; this.vy+=0.08; this.a-=0.015; }
+            draw() { if(this.a<=0)return; animCtx.save(); animCtx.globalAlpha=Math.min(1,this.a); animCtx.font=`bold ${this.fs}px 'Quicksand'`; animCtx.fillStyle=this.c; animCtx.textAlign="center"; animCtx.shadowColor='#000'; animCtx.shadowBlur=8; animCtx.fillText(this.text,this.x,this.y); animCtx.restore(); }
+        }
+        class FireworkRocket {
+            constructor(sx, sy, tx, ty) { this.x=sx; this.y=sy; this.tx=tx; this.ty=ty; this.speed=18; const angle=Math.atan2(ty-sy,tx-sx); this.vx=Math.cos(angle)*this.speed; this.vy=Math.sin(angle)*this.speed; this.trail=[]; this.exploded=false; }
+            update() { this.trail.push({x:this.x,y:this.y}); if(this.trail.length>8) this.trail.shift(); this.x+=this.vx; this.y+=this.vy; if(Math.abs(this.x-this.tx)<this.speed && Math.abs(this.y-this.ty)<this.speed) { this.exploded=true; explodeHeart(this.x,this.y); } }
+            draw() { animCtx.save(); animCtx.beginPath(); animCtx.moveTo(this.trail[0]?.x||this.x,this.trail[0]?.y||this.y); animCtx.lineTo(this.x,this.y); const grad=animCtx.createLinearGradient(this.trail[0]?.x||this.x,this.trail[0]?.y||this.y,this.x,this.y); grad.addColorStop(0,'rgba(255,200,0,0)'); grad.addColorStop(1,'#ffb3d9'); animCtx.strokeStyle=grad; animCtx.lineWidth=4; animCtx.lineCap='round'; animCtx.stroke(); animCtx.restore(); }
+        }
+        function getHeartPoint(t,s) { const x=16*Math.pow(Math.sin(t),3); const y=-(13*Math.cos(t)-5*Math.cos(2*t)-2*Math.cos(3*t)-Math.cos(4*t)); return {x:x*s, y:y*s}; }
+        class HeartParticle { constructor(x,y,vx,vy,c) { this.x=x;this.y=y;this.vx=vx;this.vy=vy;this.c=c;this.a=1;this.grav=0.05;this.decay=Math.random()*0.01+0.005; } update(){ this.vx*=0.95;this.vy*=0.95;this.vy+=this.grav;this.x+=this.vx;this.y+=this.vy;this.a-=this.decay; } draw(){ animCtx.save(); animCtx.globalAlpha=this.a; animCtx.beginPath(); animCtx.arc(this.x,this.y,2.5,0,Math.PI*2); animCtx.fillStyle=this.c; animCtx.shadowBlur=15; animCtx.shadowColor=this.c; animCtx.fill(); animCtx.restore(); } }
+        function explodeHeart(x, y) { const c=romanticColors[Math.floor(Math.random()*romanticColors.length)]; const s=Math.random()*0.7+0.8; for(let i=0; i<Math.PI*2; i+=0.04) { const p=getHeartPoint(i,s); particles.push(new HeartParticle(x,y,p.x*0.45,p.y*0.45,c)); }}
+        
+        // Cánh hoa rơi (Cảnh 2)
+        class Petal {
+            constructor() { this.x=Math.random()*width; this.y=-20; this.size=Math.random()*4+3; this.sy=Math.random()*2+1; this.sx=(Math.random()-0.5)*1.5; this.rot=Math.random()*360; this.spin=(Math.random()-0.5)*4; this.color=`rgba(255, 215, 0, ${Math.random()*0.5+0.5})`; }
+            update() { this.y+=this.sy; this.x+=this.sx+Math.sin(this.y*0.02); this.rot+=this.spin; }
+            draw() { animCtx.save(); animCtx.translate(this.x,this.y); animCtx.rotate(this.rot*Math.PI/180); animCtx.fillStyle=this.color; animCtx.beginPath(); animCtx.ellipse(0,0,this.size,this.size/2,0,0,Math.PI*2); animCtx.fill(); animCtx.restore(); }
+        }
+
+        let fireworks=[], particles=[], stars=[], auras=[], floatingWords=[], petals=[];
+        let screenFlash = 0;
+        let lixiSpots = []; 
+
+        for(let i=0; i<200; i++) stars.push({ x:Math.random()*width, y:Math.random()*height, r:Math.random()*1.5, a:Math.random(), s:Math.random()*0.02 });
+
+        // --- XỬ LÝ SỰ KIỆN CLICK Ở CẢNH 1 ---
+        function handleCanvasClick(x, y) {
+            if(currentScene !== 1) return;
+            screenFlash = 0.4;
+            auras.push(new AuraRing(x,y));
+            for(let i=0;i<3;i++) floatingWords.push(new FloatingWord(x,y));
+            fireworks.push(new FireworkRocket(width/2, height+50, x, y));
+        }
+        animCanvas.addEventListener('click', e => handleCanvasClick(e.clientX, e.clientY));
+        animCanvas.addEventListener('touchstart', e => handleCanvasClick(e.touches[0].clientX, e.touches[0].clientY), {passive: false});
+
+        // --- VÒNG LẶP ANIMATION ---
+        function animate() {
+            requestAnimationFrame(animate);
+
+            if (currentScene === 1) {
+                // Ở cảnh 1: Nền mờ để tạo hiệu ứng vệt đuôi pháo hoa
+                animCtx.fillStyle = 'rgba(5, 2, 16, 0.25)';
+                animCtx.fillRect(0, 0, width, height);
+                
+                if(screenFlash>0) { animCtx.fillStyle=`rgba(255,100,150,${screenFlash})`; animCtx.fillRect(0,0,width,height); screenFlash-=0.05; }
+
+                stars.forEach(s=>{ s.a+=s.s; if(s.a>1||s.a<0.1) s.s*=-1; animCtx.beginPath(); animCtx.arc(s.x,s.y,s.r,0,Math.PI*2); animCtx.fillStyle=`rgba(255,255,255,${s.a})`; animCtx.fill(); });
+                
+                auras.forEach((a,i)=>{ a.update(); a.draw(); if(a.a<=0) auras.splice(i,1); });
+                floatingWords.forEach((f,i)=>{ f.update(); f.draw(); if(f.a<=0) floatingWords.splice(i,1); });
+            } else {
+                // Ở cảnh 2: Phải xóa sạch canvas động hoàn toàn để nhìn thấy rõ cây mai ở dưới
+                animCtx.clearRect(0, 0, width, height);
+                
+                if(Math.random()<0.1) petals.push(new Petal());
+                petals.forEach((p,i)=>{ p.update(); p.draw(); if(p.y>height+50) petals.splice(i,1); });
+            }
+
+            // Pháo hoa và trái tim (chạy xuyên suốt 2 cảnh)
+            fireworks.forEach((f,i)=>{ f.update(); f.draw(); if(f.exploded) fireworks.splice(i,1); });
+            particles.forEach((p,i)=>{ p.update(); p.draw(); if(p.a<=0) particles.splice(i,1); });
+        }
+        animate();
+
+        // Gõ chữ cảnh 1
+        const finalText = "Chúc mừng năm mới người tôi yêu! ❤️\nCảm ơn em đã đến và làm thế giới của anh rực rỡ như pháo hoa đêm nay.\nChúc em một năm mới thật nhiều niềm vui, hạnh phúc nhé😘";
+        let textIdx=0; const typeWriterEl = document.getElementById("typewriter-text");
+        function typeWriter() { if(textIdx<finalText.length) { typeWriterEl.innerHTML+=(finalText.charAt(textIdx)==='\n'?'<br>':finalText.charAt(textIdx)); textIdx++; setTimeout(typeWriter, 70); }}
+        setTimeout(typeWriter, 1000);
+
+        let autoFirework = setInterval(() => {
+            if(currentScene===1 && Math.random()>0.3) fireworks.push(new FireworkRocket(Math.random()*width, height+50, Math.random()*width, Math.random()*(height/2)));
+        }, 2000);
+
+
+        // --- THUẬT TOÁN VẼ CÂY MAI ---
+        function drawFlower(ctx, x, y, size) {
+             ctx.save(); ctx.translate(x, y);
+             for(let i=0; i<5; i++) { ctx.beginPath(); ctx.rotate(Math.PI*2/5); ctx.ellipse(0, size/2, size/2, size/4, 0, 0, Math.PI*2); ctx.fillStyle = '#ffd700'; ctx.fill(); }
+             ctx.beginPath(); ctx.arc(0, 0, size/3, 0, Math.PI*2); ctx.fillStyle = '#ff8c00'; ctx.fill();
+             ctx.restore();
+        }
+
+        function drawBranch(ctx, x, y, len, angle, branchWidth, depth) {
+            ctx.beginPath(); ctx.save();
+            ctx.lineWidth = branchWidth; ctx.lineCap = "round"; ctx.strokeStyle = "#3e2723"; 
+            
+            let endX = x + len * Math.cos(angle);
+            let endY = y + len * Math.sin(angle);
+            
+            ctx.moveTo(x, y);
+            if (depth > 3) {
+                let cpX = x + (len * 0.5) * Math.cos(angle + 0.2); let cpY = y + (len * 0.5) * Math.sin(angle + 0.2);
+                ctx.quadraticCurveTo(cpX, cpY, endX, endY);
+            } else { ctx.lineTo(endX, endY); }
+            ctx.stroke(); ctx.restore();
+
+            // Nếu đến cành nhỏ nhất -> vẽ hoa
+            if (depth === 0) {
+                drawFlower(ctx, endX, endY, Math.random() * 5 + 4);
+                // Lưu lại tọa độ để gắn lì xì
+                if (Math.random() > 0.7) lixiSpots.push({x: endX, y: endY});
+                return;
+            }
+            
+            let numBranches = (depth === 7) ? 3 : (Math.random() > 0.4 ? 2 : 3);
+            for(let i=0; i<numBranches; i++) {
+                let newAngle = angle + (Math.random() * 1 - 0.5); 
+                let newLen = len * (0.65 + Math.random() * 0.15); 
+                drawBranch(ctx, endX, endY, newLen, newAngle, branchWidth * 0.7, depth - 1);
+            }
+        }
+
+        // Hàm hỗ trợ vẽ lại cây (Dùng khi xoay màn hình điện thoại)
+        function drawTreeOnly() {
+            treeCtx.clearRect(0, 0, width, height); // Xóa sạch lớp nền
+            let treeHeight = height * 0.22;
+            drawBranch(treeCtx, width/2, height, treeHeight, -Math.PI/2, 18, 7);
+        }
+
+        // --- XỬ LÝ CHUYỂN CẢNH ---
+        document.getElementById('btn-next').addEventListener('click', () => {
+            currentScene = 2; 
+            clearInterval(autoFirework); 
+            
+            // 1. Ẩn chữ và nút cảnh 1
+            document.getElementById('scene1').style.opacity = '0';
+            
+            // 2. Hiện nền đỏ đậm ở tận cùng
+            document.getElementById('bg-red').style.opacity = '1';
+            
+            // 3. Hiện container của Lì xì
+            document.getElementById('scene2').style.display = 'block';
+
+            setTimeout(() => {
+                document.getElementById('scene1').style.display = 'none';
+                
+                // 4. Bắt đầu vẽ cây
+                lixiSpots = []; 
+                drawTreeOnly();
+                document.getElementById('tree-canvas').style.display = 'block';
+
+                // 5. Gắn bao lì xì lên cành
+                const container = document.getElementById('lixi-container');
+                const spots = lixiSpots.sort(() => 0.5 - Math.random()).slice(0, wishes.length);
+                
+                spots.forEach((spot, idx) => {
+                    const lixi = document.createElement('div');
+                    lixi.className = 'lixi';
+                    lixi.style.left = `${spot.x - 17}px`; 
+                    lixi.style.top = `${spot.y}px`;
+                    lixi.style.animationDelay = `${Math.random() * 2}s`;
+                    
+                    lixi.addEventListener('click', () => {
+                        explodeHeart(spot.x, spot.y); 
+                        document.getElementById('wish-text').innerText = wishes[idx];
+                        document.getElementById('wish-modal').classList.add('active');
+                        lixi.style.display = 'none'; 
+                    });
+                    container.appendChild(lixi);
+                });
+
+                document.getElementById('scene2').style.opacity = '1';
+            }, 1000);
+        });
+
+        document.getElementById('btn-close').addEventListener('click', () => {
+            document.getElementById('wish-modal').classList.remove('active');
+        });
+
+    </script>
+</body>
+</html>
